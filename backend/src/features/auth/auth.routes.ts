@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   redirectToAirtableAuth,
   handleAirtableCallback,
-} from "../controllers/authController";
+} from "./auth.controller";
 
 const router = Router();
 
