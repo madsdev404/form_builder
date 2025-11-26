@@ -1,19 +1,17 @@
+import axios from "axios";
+import jwt from "jsonwebtoken";
+import User from "../../models/User";
+
 export const getAirtableAuthUrl = (): string => {
   const redirectUri = process.env.AIRTABLE_REDIRECT_URI;
   const clientId = process.env.AIRTABLE_CLIENT_ID;
-
-  // These are the permissions the app is asking for.
-  const scopes = "data.records:read data.records:write user.email:read offline";
-
-  // A random string to prevent CSRF attacks, verify in the callback.
   const state = "csrf-token-123";
 
   if (!redirectUri || !clientId) {
-    throw new Error(
-      "Airtable environment variables AIRTABLE_REDIRECT_URI and AIRTABLE_CLIENT_ID must be set."
-    );
+    throw new Error("Airtable environment variables is missing!");
   }
 
+  const scopes = "data.records:read data.records:write user.email:read offline";
   const authUrl =
     `https://airtable.com/oauth2/v1/authorize?` +
     `client_id=${clientId}&` +
@@ -26,15 +24,63 @@ export const getAirtableAuthUrl = (): string => {
 };
 
 // Processes the callback from Airtable after user authorization.
-export const processAirtableCallback = (
-  code: string | undefined,
-  state: string | undefined
-) => {
-  // TODO:
+export const processAirtableCallback = async (
+  code: string,
+  state: string
+): Promise<string> => {
+  if (state !== "csrf-token-123") {
+    throw new Error("Invalid state parameter.");
+  }
 
-  console.log("Processing callback in service...");
-  console.log("Received code:", code);
-  console.log("Received state:", state);
+  const tokenResponse = await axios.post(
+    "https://airtable.com/oauth2/v1/token",
+    new URLSearchParams({
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: process.env.AIRTABLE_REDIRECT_URI!,
+    }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      auth: {
+        username: process.env.AIRTABLE_CLIENT_ID!,
+        password: process.env.AIRTABLE_CLIENT_SECRET!,
+      },
+    }
+  );
 
-  return { message: "Login callback is a work in progress..." };
+  const { access_token, refresh_token, expires_in, scope } = tokenResponse.data;
+
+  const userProfileResponse = await axios.get(
+    "https://api.airtable.com/v0/me",
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    }
+  );
+
+  const { id: airtableUserId, email, name } = userProfileResponse.data;
+  const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
+
+  const user = await User.findOneAndUpdate(
+    { airtableUserId: airtableUserId },
+    {
+      airtableUserId,
+      email,
+      name,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      tokenExpiresAt: tokenExpiresAt,
+      scopes: scope.split(" "),
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+
+  const appJwt = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
+    expiresIn: "7d",
+  });
+
+  return appJwt;
 };
