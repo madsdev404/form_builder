@@ -7,9 +7,9 @@ import {
 const router = Router();
 
 // Redirects the user to Airtable's OAuth consent page
-router.get("/auth/airtable", redirectToAirtableAuth);
+router.get("/airtable", redirectToAirtableAuth);
 
 // Handles the callback from Airtable after authorization
-router.get("/auth/airtable/callback", handleAirtableCallback);
+router.get("/airtable/callback", handleAirtableCallback);
 
 export default router;

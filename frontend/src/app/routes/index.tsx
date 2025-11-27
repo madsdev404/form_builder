@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "../App";
 import ProtectedRoute from "./ProtectedRoute";
 import ErrorPage from "../ui/ErrorPage";
-import HomePage from "@/features/home/routes/HomePage";
+import DashboardPage from "@/features/dashboard/routes/DashboardPage";
 import LoginPage from "@/features/auth/routes/LoginPage";
 import AuthCallbackPage from "@/features/auth/routes/AuthCallbackPage";
 
@@ -28,7 +28,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <HomePage />,
+            element: <DashboardPage />,
           },
         ],
       },

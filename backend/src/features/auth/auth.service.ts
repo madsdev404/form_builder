@@ -51,7 +51,7 @@ export const getAirtableAuthUrl = (): string => {
   authUrl.searchParams.append("response_type", "code");
   authUrl.searchParams.append(
     "scope",
-    "data.records:read data.records:write user.email:read"
+    "data.records:read data.records:write user.email:read schema.bases:read"
   );
   authUrl.searchParams.append(
     "state",
@@ -138,6 +138,67 @@ async function findOrCreateUser(tokenData: any, profileData: any) {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 }
+
+// Helper to check if a token is expired or close to expiring.
+export const isTokenExpired = (user: IUser): boolean => {
+  return (
+    !user.tokenExpiresAt ||
+    user.tokenExpiresAt.getTime() < Date.now() + 60 * 1000
+  );
+};
+
+// Helper to refresh the Airtable access token.
+export const refreshAirtableToken = async (user: IUser): Promise<IUser> => {
+  if (!user.refreshToken) {
+    throw new Error("No refresh token available for this user.");
+  }
+
+  const postData = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: user.refreshToken,
+    client_id: env.AIRTABLE_CLIENT_ID,
+  }).toString();
+
+  const tokenResponse = await httpsRequest(
+    new URL("https://airtable.com/oauth2/v1/token"),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(
+          `${env.AIRTABLE_CLIENT_ID}:${env.AIRTABLE_CLIENT_SECRET}`
+        ).toString("base64")}`,
+        "Content-Length": Buffer.byteLength(postData),
+      },
+      family: 4,
+    },
+    postData
+  );
+
+  if (tokenResponse.statusCode >= 400) {
+    throw new Error(
+      `Failed to refresh token. Status: ${
+        tokenResponse.statusCode
+      }, Body: ${JSON.stringify(tokenResponse.body)}`
+    );
+  }
+
+  const tokenData = JSON.parse(tokenResponse.body);
+  const {
+    access_token: newAccessToken,
+    refresh_token: newRefreshToken,
+    expires_in: expiresIn,
+  } = tokenData;
+
+  user.accessToken = newAccessToken;
+  user.tokenExpiresAt = new Date(Date.now() + expiresIn * 1000);
+  if (newRefreshToken) {
+    user.refreshToken = newRefreshToken;
+  }
+
+  await user.save();
+  return user;
+};
 
 // Handles the OAuth callback from Airtable
 export const processAirtableCallback = async (
