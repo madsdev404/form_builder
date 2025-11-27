@@ -1,7 +1,7 @@
 import { SiAirtable } from "react-icons/si";
 
 const LoginPage = () => {
-  const backendUrl = "http://localhost:3000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">

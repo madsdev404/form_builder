@@ -6,7 +6,7 @@ export interface IUser extends Document {
   name: string;
   profilePictureUrl?: string;
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   tokenExpiresAt: Date;
   scopes: string[];
 }
@@ -18,7 +18,7 @@ const userSchema = new Schema<IUser>(
     name: { type: String, required: true },
     profilePictureUrl: { type: String },
     accessToken: { type: String, required: true },
-    refreshToken: { type: String, required: true },
+    refreshToken: { type: String, required: false },
     tokenExpiresAt: { type: Date, required: true },
     scopes: [{ type: String }],
   },
