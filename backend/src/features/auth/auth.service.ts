@@ -51,7 +51,7 @@ export const getAirtableAuthUrl = (): string => {
   authUrl.searchParams.append("response_type", "code");
   authUrl.searchParams.append(
     "scope",
-    "data.records:read data.records:write user.email:read schema.bases:read"
+    "data.records:read data.records:write user.email:read schema.bases:read schema.bases:write"
   );
   authUrl.searchParams.append(
     "state",
