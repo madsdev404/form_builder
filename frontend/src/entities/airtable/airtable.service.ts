@@ -6,8 +6,23 @@ export interface AirtableBase {
   permissionLevel: string;
 }
 
+export interface AirtableTable {
+  id: string;
+  name: string;
+  primaryFieldId: string;
+  fields: {
+    id: string;
+    name: string;
+    type: string;
+  }[];
+}
+
 interface GetBasesResponse {
   bases: AirtableBase[];
+}
+
+interface GetTablesResponse {
+  tables: AirtableTable[];
 }
 
 // Fetches the list of Airtable bases for the authenticated user.
@@ -19,6 +34,19 @@ export const getBases = async (): Promise<AirtableBase[]> => {
     return response.data.bases;
   } catch (error) {
     console.error("Failed to fetch Airtable bases:", error);
+    throw error;
+  }
+};
+
+// Fetches the list of tables for a given Airtable base.
+export const getTables = async (baseId: string): Promise<AirtableTable[]> => {
+  try {
+    const response = await apiClient.get<GetTablesResponse>(
+      `/api/airtable/bases/${baseId}/tables`
+    );
+    return response.data.tables;
+  } catch (error) {
+    console.error(`Failed to fetch Airtable tables for base ${baseId}:`, error);
     throw error;
   }
 };
