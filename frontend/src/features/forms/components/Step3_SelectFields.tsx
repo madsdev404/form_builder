@@ -1,4 +1,4 @@
-import { FiAlertCircle, FiCheckSquare } from "react-icons/fi";
+import { FiAlertCircle, FiCheckSquare, FiLoader } from "react-icons/fi";
 import { type AirtableTable } from "@/entities/airtable/airtable.service";
 
 const SUPPORTED_FIELD_TYPES = [
@@ -17,6 +17,11 @@ interface Step3_SelectFieldsProps {
   onFieldToggle: (fieldId: string) => void;
   onNext: () => void;
   onBack: () => void;
+  formName: string;
+  onFormNameChange: (name: string) => void;
+  questionLabels: Record<string, string>;
+  onLabelChange: (fieldId: string, label: string) => void;
+  isSubmitting?: boolean;
 }
 
 const Step3_SelectFields = ({
@@ -26,6 +31,11 @@ const Step3_SelectFields = ({
   onFieldToggle,
   onNext,
   onBack,
+  formName,
+  onFormNameChange,
+  questionLabels,
+  onLabelChange,
+  isSubmitting,
 }: Step3_SelectFieldsProps) => {
   const supportedFields =
     selectedTable?.fields.filter((field) =>
@@ -35,29 +45,70 @@ const Step3_SelectFields = ({
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-800">
-        Step 3: Select Fields
+        Step 3: Name Your Form & Select Fields
       </h2>
       <p className="mt-1 text-gray-600">
-        Choose the fields to include in your form.
+        Finally, give your form a name and choose the fields to include.
       </p>
+
+      <div className="mt-6">
+        <label
+          htmlFor="formName"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Form Name
+        </label>
+        <input
+          type="text"
+          id="formName"
+          value={formName}
+          onChange={(e) => onFormNameChange(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="e.g., Project Signup Form"
+        />
+      </div>
 
       {supportedFields.length > 0 ? (
         <div className="mt-6 border rounded-md divide-y">
           {supportedFields.map((field) => (
             <label
               key={field.id}
-              className="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50"
+              htmlFor={`field-${field.id}`}
+              className="block p-4 cursor-pointer hover:bg-gray-50"
             >
-              <input
-                type="checkbox"
-                checked={!!selectedFields[field.id]}
-                onChange={() => onFieldToggle(field.id)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <div>
-                <p className="font-medium text-gray-800">{field.name}</p>
-                <p className="text-sm text-gray-500">{field.type}</p>
+              <div className="flex items-start gap-4">
+                <input
+                  id={`field-${field.id}`}
+                  type="checkbox"
+                  checked={!!selectedFields[field.id]}
+                  onChange={() => onFieldToggle(field.id)}
+                  className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div className="flex-1">
+                  <span className="font-medium text-gray-800">
+                    {field.name}
+                  </span>
+                  <p className="text-sm text-gray-500">{field.type}</p>
+                </div>
               </div>
+              {selectedFields[field.id] && (
+                <div className="mt-3 ml-9">
+                  <label
+                    htmlFor={`label-${field.id}`}
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Question Label
+                  </label>
+                  <input
+                    type="text"
+                    id={`label-${field.id}`}
+                    value={questionLabels[field.id] || field.name}
+                    onChange={(e) => onLabelChange(field.id, e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              )}
             </label>
           ))}
         </div>
@@ -82,11 +133,20 @@ const Step3_SelectFields = ({
         </button>
         <button
           onClick={onNext}
-          disabled={!hasSelectedFields}
-          className="bg-green-600 text-white font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
+          disabled={!hasSelectedFields || !formName || isSubmitting}
+          className="bg-green-600 text-white font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center cursor-pointer"
         >
-          <FiCheckSquare className="inline-block mr-2" />
-          Finish
+          {isSubmitting ? (
+            <>
+              <FiLoader className="animate-spin mr-2" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <FiCheckSquare className="inline-block mr-2" />
+              Finish
+            </>
+          )}
         </button>
       </div>
     </div>

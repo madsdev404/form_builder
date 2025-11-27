@@ -1,21 +1,28 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
   getBases,
   getTables,
   type AirtableTable,
 } from "@/entities/airtable/airtable.service";
+import { createForm } from "../form.service";
 import Step1_SelectBase from "../components/Step1_SelectBase";
 import Step2_SelectTable from "../components/Step2_SelectTable";
 import Step3_SelectFields from "../components/Step3_SelectFields";
 
 const CreateFormPage = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<AirtableTable | null>(
     null
   );
   const [selectedFields, setSelectedFields] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [formName, setFormName] = useState("");
+  const [questionLabels, setQuestionLabels] = useState<Record<string, string>>(
     {}
   );
 
@@ -41,11 +48,38 @@ const CreateFormPage = () => {
     enabled: currentStep === 2 && !!selectedBaseId,
   });
 
+  const mutation = useMutation({
+    mutationFn: createForm,
+    onSuccess: () => {
+      navigate("/");
+    },
+    onError: (error) => {
+      alert(`Error saving form: ${error.message}`);
+    },
+  });
+
   const handleNext = () => {
     if (currentStep === 1 && selectedBaseId) {
       setCurrentStep(2);
     } else if (currentStep === 2 && selectedTable) {
       setCurrentStep(3);
+    } else if (currentStep === 3) {
+      const formData = {
+        name: formName,
+        airtableBaseId: selectedBaseId!,
+        airtableTableId: selectedTable!.id,
+        questions: Object.keys(selectedFields)
+          .filter((fieldId) => selectedFields[fieldId])
+          .map((fieldId) => {
+            const field = selectedTable!.fields.find((f) => f.id === fieldId);
+            return {
+              airtableFieldId: fieldId,
+              label: questionLabels[fieldId] || field?.name || "",
+              type: field?.type || "",
+            };
+          }),
+      };
+      mutation.mutate(formData);
     }
   };
 
@@ -54,7 +88,6 @@ const CreateFormPage = () => {
       setSelectedTable(null);
       setCurrentStep(1);
     } else if (currentStep === 3) {
-      setSelectedFields({});
       setCurrentStep(2);
     }
   };
@@ -67,6 +100,13 @@ const CreateFormPage = () => {
     setSelectedFields((prev) => ({
       ...prev,
       [fieldId]: !prev[fieldId],
+    }));
+  };
+
+  const handleLabelChange = (fieldId: string, newLabel: string) => {
+    setQuestionLabels((prev) => ({
+      ...prev,
+      [fieldId]: newLabel,
     }));
   };
 
@@ -107,6 +147,11 @@ const CreateFormPage = () => {
           onFieldToggle={handleFieldToggle}
           onNext={handleNext}
           onBack={handleBack}
+          formName={formName}
+          onFormNameChange={setFormName}
+          questionLabels={questionLabels}
+          onLabelChange={handleLabelChange}
+          isSubmitting={mutation.isPending}
         />
       )}
     </div>
