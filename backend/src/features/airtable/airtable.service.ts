@@ -5,7 +5,8 @@ import { IUser } from "../../models/User";
 // Native https request helper
 const httpsRequest = (
   url: URL,
-  options: https.RequestOptions
+  options: https.RequestOptions,
+  postData?: string
 ): Promise<{ statusCode: number; body: any }> => {
   return new Promise((resolve, reject) => {
     const req = https.request(url, options, (res) => {
@@ -18,6 +19,12 @@ const httpsRequest = (
             body: JSON.parse(body),
           });
         } catch (error) {
+          if (body === "") {
+            return resolve({
+              statusCode: res.statusCode || 500,
+              body: "",
+            });
+          }
           reject(new Error(`Failed to parse JSON response: ${body}`));
         }
       });
@@ -25,6 +32,9 @@ const httpsRequest = (
     req.on("error", (e) => reject(e));
     req.on("timeout", () => req.destroy(new Error("Request timed out")));
     req.setTimeout(15000);
+    if (postData) {
+      req.write(postData);
+    }
     req.end();
   });
 };
@@ -71,6 +81,39 @@ export const getAirtableTables = async (user: IUser, baseId: string) => {
   if (response.statusCode >= 400) {
     throw new Error(
       `Failed to fetch Airtable tables. Status: ${
+        response.statusCode
+      }, Body: ${JSON.stringify(response.body)}`
+    );
+  }
+
+  return response.body;
+};
+
+// Creates a new record in a given Airtable table.
+export const createAirtableRecord = async (
+  user: IUser,
+  baseId: string,
+  tableIdOrName: string,
+  fields: object
+) => {
+  const url = new URL(`https://api.airtable.com/v0/${baseId}/${tableIdOrName}`);
+  const postData = JSON.stringify({ fields });
+
+  const options = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${user.accessToken}`,
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(postData),
+    },
+    family: 4,
+  };
+
+  const response = await httpsRequest(url, options, postData);
+
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to create Airtable record. Status: ${
         response.statusCode
       }, Body: ${JSON.stringify(response.body)}`
     );

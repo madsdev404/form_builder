@@ -20,6 +20,8 @@ export interface IForm {
   createdAt: string;
 }
 
+export type FormAnswerValue = string | string[] | File | File[] | null;
+
 export const createForm = async (formData: CreateFormData) => {
   const response = await apiClient.post("/api/forms", formData);
   return response.data;
@@ -32,5 +34,15 @@ export const getForms = async (): Promise<IForm[]> => {
 
 export const getFormById = async (formId: string): Promise<IForm> => {
   const response = await apiClient.get(`/api/forms/${formId}`);
+  return response.data;
+};
+
+export const submitResponse = async (
+  formId: string,
+  answers: Record<string, FormAnswerValue>
+) => {
+  const response = await apiClient.post(`/api/forms/${formId}/responses`, {
+    answers,
+  });
   return response.data;
 };
