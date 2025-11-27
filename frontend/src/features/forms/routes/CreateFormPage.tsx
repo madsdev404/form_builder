@@ -76,6 +76,7 @@ const CreateFormPage = () => {
               airtableFieldId: fieldId,
               label: questionLabels[fieldId] || field?.name || "",
               type: field?.type || "",
+              options: field?.options,
             };
           }),
       };

@@ -6,15 +6,24 @@ export interface AirtableBase {
   permissionLevel: string;
 }
 
+export interface AirtableField {
+  id: string;
+  name: string;
+  type: string;
+  options?: {
+    choices: {
+      id: string;
+      name: string;
+      color?: string;
+    }[];
+  };
+}
+
 export interface AirtableTable {
   id: string;
   name: string;
   primaryFieldId: string;
-  fields: {
-    id: string;
-    name: string;
-    type: string;
-  }[];
+  fields: AirtableField[];
 }
 
 interface GetBasesResponse {

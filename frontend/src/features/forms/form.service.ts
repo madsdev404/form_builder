@@ -1,9 +1,17 @@
 import apiClient from "@/shared/api/apiClient";
 
+export interface IChoice {
+  id: string;
+  name: string;
+}
+
 export interface FormQuestionData {
   airtableFieldId: string;
   label: string;
   type: string;
+  options?: {
+    choices: IChoice[];
+  };
 }
 
 export interface CreateFormData {

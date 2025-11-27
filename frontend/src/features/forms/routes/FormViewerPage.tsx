@@ -7,6 +7,7 @@ import {
   type FormAnswerValue,
 } from "../form.service";
 import { FiLoader } from "react-icons/fi";
+import QuestionRenderer from "../components/QuestionRenderer";
 
 const FormViewerPage = () => {
   const { formId } = useParams<{ formId: string }>();
@@ -97,14 +98,10 @@ const FormViewerPage = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   {question.label}
                 </label>
-                <input
-                  type="text"
-                  value={(answers[question.airtableFieldId] as string) || ""}
-                  onChange={(e) =>
-                    handleInputChange(question.airtableFieldId, e.target.value)
-                  }
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  // TODO: render different input types based on question.type
+                <QuestionRenderer
+                  question={question}
+                  value={answers[question.airtableFieldId]}
+                  onChange={handleInputChange}
                 />
               </div>
             ))}
