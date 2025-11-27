@@ -1,9 +1,5 @@
 import apiClient from "@/shared/api/apiClient";
-
-export interface IChoice {
-  id: string;
-  name: string;
-}
+import { type IChoice } from "@/entities/airtable/airtable.service";
 
 export interface FormQuestionData {
   airtableFieldId: string;

@@ -6,16 +6,18 @@ export interface AirtableBase {
   permissionLevel: string;
 }
 
+export interface IChoice {
+  id: string;
+  name: string;
+  color?: string;
+}
+
 export interface AirtableField {
   id: string;
   name: string;
   type: string;
   options?: {
-    choices: {
-      id: string;
-      name: string;
-      color?: string;
-    }[];
+    choices: IChoice[];
   };
 }
 

@@ -5,6 +5,7 @@ import {
   getBases,
   getTables,
   type AirtableTable,
+  type IChoice,
 } from "@/entities/airtable/airtable.service";
 import { createForm } from "../form.service";
 import Step1_SelectBase from "../components/Step1_SelectBase";
@@ -23,6 +24,9 @@ const CreateFormPage = () => {
   );
   const [formName, setFormName] = useState("");
   const [questionLabels, setQuestionLabels] = useState<Record<string, string>>(
+    {}
+  );
+  const [customChoices, setCustomChoices] = useState<Record<string, IChoice[]>>(
     {}
   );
 
@@ -72,11 +76,16 @@ const CreateFormPage = () => {
           .filter((fieldId) => selectedFields[fieldId])
           .map((fieldId) => {
             const field = selectedTable!.fields.find((f) => f.id === fieldId);
+            const existingChoices = field?.options?.choices || [];
+            const newChoices = customChoices[fieldId] || [];
+            const allChoices = [...existingChoices, ...newChoices];
+
             return {
               airtableFieldId: fieldId,
               label: questionLabels[fieldId] || field?.name || "",
               type: field?.type || "",
-              options: field?.options,
+              options:
+                allChoices.length > 0 ? { choices: allChoices } : undefined,
             };
           }),
       };
@@ -108,6 +117,14 @@ const CreateFormPage = () => {
     setQuestionLabels((prev) => ({
       ...prev,
       [fieldId]: newLabel,
+    }));
+  };
+
+  const handleAddCustomChoice = (fieldId: string, choiceName: string) => {
+    const newChoice: IChoice = { id: choiceName, name: choiceName };
+    setCustomChoices((prev) => ({
+      ...prev,
+      [fieldId]: [...(prev[fieldId] || []), newChoice],
     }));
   };
 
@@ -153,6 +170,8 @@ const CreateFormPage = () => {
           questionLabels={questionLabels}
           onLabelChange={handleLabelChange}
           isSubmitting={mutation.isPending}
+          customChoices={customChoices}
+          onAddCustomChoice={handleAddCustomChoice}
         />
       )}
     </div>
