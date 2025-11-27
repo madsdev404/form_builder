@@ -97,7 +97,7 @@ export const createAirtableRecord = async (
   fields: object
 ) => {
   const url = new URL(`https://api.airtable.com/v0/${baseId}/${tableIdOrName}`);
-  const postData = JSON.stringify({ fields });
+  const postData = JSON.stringify({ fields, typecast: true });
 
   const options = {
     method: "POST",
