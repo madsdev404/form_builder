@@ -52,3 +52,29 @@ export const getAirtableBases = async (user: IUser) => {
 
   return response.body;
 };
+
+// Fetches all tables for a given Airtable base.
+export const getAirtableTables = async (user: IUser, baseId: string) => {
+  const url = new URL(
+    `https://api.airtable.com/v0/meta/bases/${baseId}/tables`
+  );
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${user.accessToken}`,
+    },
+    family: 4,
+  };
+
+  const response = await httpsRequest(url, options);
+
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to fetch Airtable tables. Status: ${
+        response.statusCode
+      }, Body: ${JSON.stringify(response.body)}`
+    );
+  }
+
+  return response.body;
+};
