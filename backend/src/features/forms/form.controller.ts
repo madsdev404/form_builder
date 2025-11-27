@@ -26,3 +26,17 @@ export const createForm = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to create form." });
   }
 };
+
+export const getForms = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
+
+    const forms = await formService.getForms(req.user._id);
+    res.status(200).json(forms);
+  } catch (error) {
+    console.error("Error fetching forms:", error);
+    res.status(500).json({ message: "Failed to fetch forms." });
+  }
+};

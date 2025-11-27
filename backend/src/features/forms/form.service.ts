@@ -23,3 +23,8 @@ export const createForm = async (
   await form.save();
   return form;
 };
+
+export const getForms = async (userId: Types.ObjectId): Promise<IForm[]> => {
+  const forms = await Form.find({ owner: userId }).sort({ createdAt: -1 });
+  return forms;
+};

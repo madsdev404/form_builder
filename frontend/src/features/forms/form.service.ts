@@ -13,7 +13,18 @@ export interface CreateFormData {
   questions: FormQuestionData[];
 }
 
+export interface IForm {
+  _id: string;
+  name: string;
+  createdAt: string;
+}
+
 export const createForm = async (formData: CreateFormData) => {
   const response = await apiClient.post("/api/forms", formData);
+  return response.data;
+};
+
+export const getForms = async (): Promise<IForm[]> => {
+  const response = await apiClient.get("/api/forms");
   return response.data;
 };
