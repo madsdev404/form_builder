@@ -1,5 +1,6 @@
 import { getBases } from "@/entities/airtable/airtable.service";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
 const DashboardPage = () => {
   const {
@@ -14,9 +15,17 @@ const DashboardPage = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-        Your Airtable Bases
-      </h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Your Airtable Bases
+        </h1>
+        <Link
+          to="/create-form"
+          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Create New Form
+        </Link>
+      </div>
 
       {isLoading && (
         <div className="text-center text-gray-500">Loading bases...</div>
