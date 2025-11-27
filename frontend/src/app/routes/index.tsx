@@ -6,6 +6,7 @@ import DashboardPage from "@/features/dashboard/routes/DashboardPage";
 import LoginPage from "@/features/auth/routes/LoginPage";
 import AuthCallbackPage from "@/features/auth/routes/AuthCallbackPage";
 import CreateFormPage from "@/features/forms/routes/CreateFormPage";
+import FormViewerPage from "@/features/forms/routes/FormViewerPage";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "auth/callback",
         element: <AuthCallbackPage />,
+      },
+      {
+        path: "form/:formId",
+        element: <FormViewerPage />,
       },
 
       // Protected routes

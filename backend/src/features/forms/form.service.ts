@@ -28,3 +28,8 @@ export const getForms = async (userId: Types.ObjectId): Promise<IForm[]> => {
   const forms = await Form.find({ owner: userId }).sort({ createdAt: -1 });
   return forms;
 };
+
+export const getFormById = async (formId: string): Promise<IForm | null> => {
+  const form = await Form.findById(formId);
+  return form;
+};

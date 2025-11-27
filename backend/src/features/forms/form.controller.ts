@@ -40,3 +40,19 @@ export const getForms = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch forms." });
   }
 };
+
+export const getForm = async (req: Request, res: Response) => {
+  try {
+    const { formId } = req.params;
+    const form = await formService.getFormById(formId);
+
+    if (!form) {
+      return res.status(404).json({ message: "Form not found." });
+    }
+
+    res.status(200).json(form);
+  } catch (error) {
+    console.error("Error fetching form:", error);
+    res.status(500).json({ message: "Failed to fetch form." });
+  }
+};

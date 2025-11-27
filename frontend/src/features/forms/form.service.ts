@@ -16,6 +16,7 @@ export interface CreateFormData {
 export interface IForm {
   _id: string;
   name: string;
+  questions: FormQuestionData[];
   createdAt: string;
 }
 
@@ -26,5 +27,10 @@ export const createForm = async (formData: CreateFormData) => {
 
 export const getForms = async (): Promise<IForm[]> => {
   const response = await apiClient.get("/api/forms");
+  return response.data;
+};
+
+export const getFormById = async (formId: string): Promise<IForm> => {
+  const response = await apiClient.get(`/api/forms/${formId}`);
   return response.data;
 };

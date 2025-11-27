@@ -20,7 +20,7 @@ app.use(express.json());
 // Define Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/airtable", authMiddleware, checkAirtableToken, airtableRoutes);
-app.use("/api/forms", authMiddleware, formRoutes);
+app.use("/api/forms", formRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Form builder backend is running, YaY!");
