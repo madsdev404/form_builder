@@ -7,7 +7,7 @@ export interface IChoice {
 }
 
 export interface ICondition {
-  questionKey: string;
+  airtableFieldId: string;
   operator: "equals" | "notEquals" | "contains";
   value: any;
 }
@@ -48,7 +48,7 @@ const ChoiceSchema = new Schema<IChoice>(
 
 const ConditionSchema = new Schema<ICondition>(
   {
-    questionKey: { type: String, required: true },
+    airtableFieldId: { type: String, required: true },
     operator: {
       type: String,
       enum: ["equals", "notEquals", "contains"],

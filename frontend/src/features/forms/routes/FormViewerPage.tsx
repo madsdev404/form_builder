@@ -5,6 +5,8 @@ import {
   getFormById,
   submitResponse,
   type FormAnswerValue,
+  shouldShowQuestion,
+  type FormQuestionData,
 } from "../form.service";
 import { FiLoader } from "react-icons/fi";
 import QuestionRenderer from "../components/QuestionRenderer";
@@ -37,10 +39,27 @@ const FormViewerPage = () => {
   });
 
   const handleInputChange = (fieldId: string, value: FormAnswerValue) => {
-    setAnswers((prev) => ({
-      ...prev,
+    let newAnswers = {
+      ...answers,
       [fieldId]: value,
-    }));
+    };
+
+    let changedInLoop = true;
+    while (changedInLoop) {
+      changedInLoop = false;
+      form?.questions.forEach((q) => {
+        const isEnabled = shouldShowQuestion(q, newAnswers);
+        if (!isEnabled && newAnswers[q.airtableFieldId] != null) {
+          newAnswers = {
+            ...newAnswers,
+            [q.airtableFieldId]: null,
+          };
+          changedInLoop = true;
+        }
+      });
+    }
+
+    setAnswers(newAnswers);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,18 +112,27 @@ const FormViewerPage = () => {
         </h1>
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
-            {form.questions.map((question) => (
-              <div key={question.airtableFieldId}>
-                <label className="block text-sm font-medium text-gray-700">
-                  {question.label}
-                </label>
-                <QuestionRenderer
-                  question={question}
-                  value={answers[question.airtableFieldId]}
-                  onChange={handleInputChange}
-                />
-              </div>
-            ))}
+            {form.questions.map((question: FormQuestionData) => {
+              const isQuestionEnabled = shouldShowQuestion(question, answers);
+              return (
+                <div
+                  key={question.airtableFieldId}
+                  className={`transition-opacity duration-300 ${
+                    !isQuestionEnabled ? "opacity-50" : ""
+                  }`}
+                >
+                  <label className="block text-sm font-medium text-gray-700">
+                    {question.label}
+                  </label>
+                  <QuestionRenderer
+                    question={question}
+                    value={answers[question.airtableFieldId]}
+                    onChange={handleInputChange}
+                    isDisabled={!isQuestionEnabled}
+                  />
+                </div>
+              );
+            })}
           </div>
           <div className="mt-8">
             <button

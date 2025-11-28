@@ -38,6 +38,53 @@ export interface IForm {
 
 export type FormAnswerValue = string | string[] | File | File[] | null;
 
+export const shouldShowQuestion = (
+  question: FormQuestionData,
+  answers: Record<string, FormAnswerValue>
+): boolean => {
+  if (!question.conditionalRules) {
+    return true;
+  }
+
+  const { logic, conditions } = question.conditionalRules;
+
+  const evaluateCondition = (condition: ICondition): boolean => {
+    const answer = answers[condition.airtableFieldId];
+    if (answer === undefined || answer === null || answer === "") {
+      return false;
+    }
+    if (Array.isArray(answer) && answer.length === 0) {
+      return false;
+    }
+
+    let answerString: string;
+    if (Array.isArray(answer)) {
+      answerString = answer.map(String).join(", ").toLowerCase();
+    } else {
+      answerString = String(answer).toLowerCase();
+    }
+    const conditionValueString = String(condition.value).toLowerCase();
+
+    switch (condition.operator) {
+      case "equals":
+        return answerString === conditionValueString;
+      case "notEquals":
+        return answerString !== conditionValueString;
+      case "contains":
+        return answerString.includes(conditionValueString);
+      default:
+        console.warn(`Unknown operator: ${condition.operator}`);
+        return false;
+    }
+  };
+
+  if (logic === "AND") {
+    return conditions.every(evaluateCondition);
+  } else {
+    return conditions.some(evaluateCondition);
+  }
+};
+
 export const createForm = async (formData: CreateFormData) => {
   const response = await apiClient.post("/api/forms", formData);
   return response.data;

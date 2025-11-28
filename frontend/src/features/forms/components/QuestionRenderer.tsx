@@ -1,18 +1,20 @@
 import { type FormQuestionData, type FormAnswerValue } from "../form.service";
 
-interface QuestionRendererProps {
+export interface QuestionRendererProps {
   question: FormQuestionData;
   value: FormAnswerValue;
   onChange: (fieldId: string, value: FormAnswerValue) => void;
+  isDisabled?: boolean;
 }
 
 const QuestionRenderer = ({
   question,
   value,
   onChange,
+  isDisabled = false,
 }: QuestionRendererProps) => {
   const commonInputClass =
-    "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm";
+    "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed";
 
   switch (question.type) {
     case "multilineText":
@@ -23,6 +25,7 @@ const QuestionRenderer = ({
           onChange={(e) => onChange(question.airtableFieldId, e.target.value)}
           className={commonInputClass}
           rows={4}
+          disabled={isDisabled}
         />
       );
 
@@ -32,6 +35,7 @@ const QuestionRenderer = ({
           value={(value as string) || ""}
           onChange={(e) => onChange(question.airtableFieldId, e.target.value)}
           className={commonInputClass}
+          disabled={isDisabled}
         >
           <option value="">Select an option</option>
           {question.options?.choices.map((choice) => (
@@ -55,6 +59,7 @@ const QuestionRenderer = ({
             onChange(question.airtableFieldId, selectedOptions);
           }}
           className={commonInputClass}
+          disabled={isDisabled}
         >
           {question.options?.choices.map((choice) => (
             <option key={choice.id} value={choice.name}>
@@ -75,6 +80,7 @@ const QuestionRenderer = ({
             )
           }
           className={`${commonInputClass} p-0 file:mr-4 file:py-2 file:px-4 file:rounded-l-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100`}
+          disabled={isDisabled}
         />
       );
 
@@ -86,6 +92,7 @@ const QuestionRenderer = ({
           value={(value as string) || ""}
           onChange={(e) => onChange(question.airtableFieldId, e.target.value)}
           className={commonInputClass}
+          disabled={isDisabled}
         />
       );
   }
