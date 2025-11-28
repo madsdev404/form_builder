@@ -7,6 +7,7 @@ import LoginPage from "@/features/auth/routes/LoginPage";
 import AuthCallbackPage from "@/features/auth/routes/AuthCallbackPage";
 import CreateFormPage from "@/features/forms/routes/CreateFormPage";
 import FormViewerPage from "@/features/forms/routes/FormViewerPage";
+import ResponseListPage from "@/features/responses/routes/ResponseListPage";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
           {
             path: "create-form",
             element: <CreateFormPage />,
+          },
+          {
+            path: "forms/:formId/responses",
+            element: <ResponseListPage />,
           },
         ],
       },

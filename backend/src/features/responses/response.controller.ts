@@ -20,3 +20,18 @@ export const createResponse = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to submit response." });
   }
 };
+
+export const getResponses = async (req: Request, res: Response) => {
+  try {
+    const { formId } = req.params;
+    if (!formId) {
+      return res.status(400).json({ message: "Form ID is required." });
+    }
+
+    const responses = await responseService.getResponsesByFormId(formId);
+    res.status(200).json(responses);
+  } catch (error) {
+    console.error("Error fetching responses:", error);
+    res.status(500).json({ message: "Failed to fetch responses." });
+  }
+};

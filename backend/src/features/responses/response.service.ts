@@ -35,3 +35,8 @@ export const createResponse = async (
 
   return newResponse;
 };
+
+export const getResponsesByFormId = async (formId: string) => {
+  const responses = await Response.find({ form: formId }).populate("form");
+  return responses;
+};

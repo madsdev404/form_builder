@@ -42,24 +42,27 @@ const DashboardPage = () => {
           <ul className="divide-y divide-gray-200">
             {forms.length > 0 ? (
               forms.map((form) => (
-                <li key={form._id}>
+                <li
+                  key={form._id}
+                  className="p-4 flex items-center justify-between hover:bg-gray-50"
+                >
                   <Link
                     to={`/form/${form._id}`}
-                    className="p-4 flex items-center justify-between hover:bg-gray-50"
+                    className="grow items-center gap-4"
                   >
-                    <div className="flex items-center gap-4">
-                      <FiFileText className="w-6 h-6 text-gray-400" />
-                      <div>
-                        <p className="font-medium text-gray-900">{form.name}</p>
-                        <p className="text-sm text-gray-500">
-                          Created:{" "}
-                          {new Date(form.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
+                    <FiFileText className="w-6 h-6 text-gray-400" />
+                    <div>
+                      <p className="font-medium text-gray-900">{form.name}</p>
+                      <p className="text-sm text-gray-500">
+                        Created: {new Date(form.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                    <span className="text-sm text-gray-500 hover:text-gray-800">
-                      View →
-                    </span>
+                  </Link>
+                  <Link
+                    to={`/forms/${form._id}/responses`}
+                    className="text-sm text-blue-600 hover:text-blue-800 ml-4 px-3 py-1 rounded-md border border-blue-600"
+                  >
+                    View Responses
                   </Link>
                 </li>
               ))
