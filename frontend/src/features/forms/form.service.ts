@@ -1,6 +1,17 @@
 import apiClient from "@/shared/api/apiClient";
 import { type IChoice } from "@/entities/airtable/airtable.service";
 
+export interface ICondition {
+  airtableFieldId: string;
+  operator: "equals" | "notEquals" | "contains";
+  value: string | number;
+}
+
+export interface IConditionalRules {
+  logic: "AND" | "OR";
+  conditions: ICondition[];
+}
+
 export interface FormQuestionData {
   airtableFieldId: string;
   label: string;
@@ -8,6 +19,7 @@ export interface FormQuestionData {
   options?: {
     choices: IChoice[];
   };
+  conditionalRules?: IConditionalRules;
 }
 
 export interface CreateFormData {

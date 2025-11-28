@@ -7,7 +7,7 @@ import {
   type AirtableTable,
   type IChoice,
 } from "@/entities/airtable/airtable.service";
-import { createForm } from "../form.service";
+import { createForm, type IConditionalRules } from "../form.service";
 import Step1_SelectBase from "../components/Step1_SelectBase";
 import Step2_SelectTable from "../components/Step2_SelectTable";
 import Step3_SelectFields from "../components/Step3_SelectFields";
@@ -29,6 +29,9 @@ const CreateFormPage = () => {
   const [customChoices, setCustomChoices] = useState<Record<string, IChoice[]>>(
     {}
   );
+  const [conditionalRules, setConditionalRules] = useState<
+    Record<string, IConditionalRules | null>
+  >({});
 
   const {
     data: bases,
@@ -86,6 +89,7 @@ const CreateFormPage = () => {
               type: field?.type || "",
               options:
                 allChoices.length > 0 ? { choices: allChoices } : undefined,
+              conditionalRules: conditionalRules[fieldId] || undefined,
             };
           }),
       };
@@ -125,6 +129,16 @@ const CreateFormPage = () => {
     setCustomChoices((prev) => ({
       ...prev,
       [fieldId]: [...(prev[fieldId] || []), newChoice],
+    }));
+  };
+
+  const handleRulesChange = (
+    fieldId: string,
+    rules: IConditionalRules | null
+  ) => {
+    setConditionalRules((prev) => ({
+      ...prev,
+      [fieldId]: rules,
     }));
   };
 
@@ -172,6 +186,8 @@ const CreateFormPage = () => {
           isSubmitting={mutation.isPending}
           customChoices={customChoices}
           onAddCustomChoice={handleAddCustomChoice}
+          conditionalRules={conditionalRules}
+          onRulesChange={handleRulesChange}
         />
       )}
     </div>

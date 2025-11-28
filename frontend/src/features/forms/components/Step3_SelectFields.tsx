@@ -4,6 +4,8 @@ import {
   type AirtableTable,
   type IChoice,
 } from "@/entities/airtable/airtable.service";
+import { type IConditionalRules } from "../form.service";
+import ConditionalLogicBuilder from "./ConditionalLogicBuilder";
 
 const SUPPORTED_FIELD_TYPES = [
   "singleLineText",
@@ -28,6 +30,8 @@ interface Step3_SelectFieldsProps {
   isSubmitting?: boolean;
   customChoices: Record<string, IChoice[]>;
   onAddCustomChoice: (fieldId: string, choiceName: string) => void;
+  conditionalRules: Record<string, IConditionalRules | null>;
+  onRulesChange: (fieldId: string, rules: IConditionalRules | null) => void;
 }
 
 const Step3_SelectFields = ({
@@ -44,6 +48,8 @@ const Step3_SelectFields = ({
   isSubmitting,
   customChoices,
   onAddCustomChoice,
+  conditionalRules,
+  onRulesChange,
 }: Step3_SelectFieldsProps) => {
   const [newChoiceInputs, setNewChoiceInputs] = useState<
     Record<string, string>
@@ -100,6 +106,9 @@ const Step3_SelectFields = ({
             const existingChoices = field.options?.choices || [];
             const newChoices = customChoices[field.id] || [];
             const allChoices = [...existingChoices, ...newChoices];
+            const otherQuestions = supportedFields.filter(
+              (q) => q.id !== field.id
+            );
 
             return (
               <div key={field.id} className="p-4">
@@ -176,6 +185,12 @@ const Step3_SelectFields = ({
                         </div>
                       </div>
                     )}
+                    <ConditionalLogicBuilder
+                      fieldId={field.id}
+                      rules={conditionalRules[field.id]}
+                      onRulesChange={onRulesChange}
+                      otherQuestions={otherQuestions}
+                    />
                   </div>
                 )}
               </div>

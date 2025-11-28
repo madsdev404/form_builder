@@ -6,6 +6,17 @@ export interface IChoice {
   name: string;
 }
 
+export interface ICondition {
+  questionKey: string;
+  operator: "equals" | "notEquals" | "contains";
+  value: any;
+}
+
+export interface IConditionalRules {
+  logic: "AND" | "OR";
+  conditions: ICondition[];
+}
+
 export interface IFormQuestion {
   airtableFieldId: string;
   label: string;
@@ -14,6 +25,7 @@ export interface IFormQuestion {
   options?: {
     choices: IChoice[];
   };
+  conditionalRules?: IConditionalRules;
 }
 
 export interface IForm extends Document {
@@ -34,6 +46,27 @@ const ChoiceSchema = new Schema<IChoice>(
   { _id: false }
 );
 
+const ConditionSchema = new Schema<ICondition>(
+  {
+    questionKey: { type: String, required: true },
+    operator: {
+      type: String,
+      enum: ["equals", "notEquals", "contains"],
+      required: true,
+    },
+    value: { type: Schema.Types.Mixed, required: true },
+  },
+  { _id: false }
+);
+
+const ConditionalRulesSchema = new Schema<IConditionalRules>(
+  {
+    logic: { type: String, enum: ["AND", "OR"], required: true },
+    conditions: [ConditionSchema],
+  },
+  { _id: false }
+);
+
 const FormQuestionSchema = new Schema<IFormQuestion>({
   airtableFieldId: { type: String, required: true },
   label: { type: String, required: true },
@@ -41,6 +74,9 @@ const FormQuestionSchema = new Schema<IFormQuestion>({
   required: { type: Boolean, default: false },
   options: {
     choices: [ChoiceSchema],
+  },
+  conditionalRules: {
+    type: ConditionalRulesSchema,
   },
 });
 
