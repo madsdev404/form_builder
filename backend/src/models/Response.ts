@@ -5,6 +5,7 @@ export interface IResponse extends Document {
   form: Types.ObjectId | IForm;
   airtableRecordId?: string;
   answers: Map<string, any>;
+  deletedInAirtable?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +19,7 @@ const ResponseSchema = new Schema<IResponse>(
       of: Schema.Types.Mixed,
       required: true,
     },
+    deletedInAirtable: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

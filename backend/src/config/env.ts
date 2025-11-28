@@ -18,6 +18,9 @@ const envSchema = z.object({
     .min(1, { message: "AIRTABLE_REDIRECT_URI is required" }),
   MONGO_URI: z.string().min(1, { message: "MONGO_URI is required" }),
   JWT_SECRET: z.string().min(1, { message: "JWT_SECRET is required" }),
+  AIRTABLE_WEBHOOK_SECRET: z
+    .string()
+    .min(1, { message: "AIRTABLE_WEBHOOK_SECRET is required" }),
 });
 
 // Parse and validate the environment variables
